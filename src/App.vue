@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+// import HelloWorld from './components/HelloWorld.vue'
 import AnotherRecordLibary from './components/AnotherRecordLibary.vue'
 
 export default {
