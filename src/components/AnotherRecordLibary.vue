@@ -1,7 +1,9 @@
 <template>
 <div>
+    <div id="micWave"></div>
     <div id="waveform"></div>
     <div id="controls">
+        <!-- <button v-show="!isRecording" @click="toggleRecord">Record1</button> -->
         <button v-show="!isRecording" @click="toggleRecording">Record</button>
         <button v-show="isRecording" @click="toggleRecording">Stop Record</button>
         <p> | </p>
@@ -10,6 +12,7 @@
         <button v-show="isPlaying" @click="wave.stop()">Stop</button>
         <button @click="playSelectedRegion">Play Region</button>
         <button @click="trimRegion">Trim</button>
+        <button @click="deleteRegion">Delete</button>
 
     </div>
     <div id="formats">Format: start recording to see sample rate</div>
@@ -37,6 +40,7 @@ export default {
             gumStream: null,
             wave: null,
             waveRegions: null,
+            micWave: null
         };
     },
     mounted() {
@@ -55,6 +59,48 @@ export default {
         }
     },
     methods: {
+        deleteRegion() {
+            // I had to fixed to two decimal if I don't do this not work, I don't know whyyy
+            const start = this.wave.regions.list[Object.keys(this.wave.regions.list)[0]].start.toFixed(2);
+            const end = this.wave.regions.list[Object.keys(this.wave.regions.list)[0]].end.toFixed(2);
+            const originalBuffer = this.wave.backend.buffer;
+            console.log(end, start, end, start, originalBuffer, (end - start) * (originalBuffer.sampleRate * 1))
+            var emptySegment = this.wave.backend.ac.createBuffer(
+                originalBuffer.numberOfChannels,
+                (this.wave.getDuration() - (end - start)) * (originalBuffer.sampleRate * 1),
+                originalBuffer.sampleRate
+            );
+            console.log("total nueva wave", this.wave.getDuration(), end, start)
+            for (var i = 0; i < originalBuffer.numberOfChannels; i++) {
+                var chanData = originalBuffer.getChannelData(i);
+                var segmentChanData = emptySegment.getChannelData(i);
+                const offset = end * originalBuffer.sampleRate;
+                for (var j = 0, len = chanData.length; j < originalBuffer.length; j++) {
+                    if (j < (start * originalBuffer.sampleRate)) {
+                        //TODO: contemplate other cases when the region is at the end
+                        segmentChanData[j] = chanData[j]
+                    } else {
+                        //if (j > end * originalBuffer.sampleRate) {
+                        segmentChanData[j] = chanData[j + offset];
+                        //} else {
+                        //  segmentChanData[j] = chanData[j + offset];
+                        //}
+                    }
+                }
+            }
+            //this.wave.drawer.clearWave();
+            //this.wave.empty();
+            this.wave.loadDecodedBuffer(emptySegment); // Here you go!
+            // Not empty anymore, contains a copy of the segment!
+            console.log(end, start, end - start)
+            //this.wave.drawBuffer();
+            this.wave.regions.clear();
+            this.wave.regions.add({
+                start: 0,
+                end: end,
+                color: 'hsla(200, 50%, 70%, 0.2)'
+            });
+        },
         trimRegion() {
             // I had to fixed to two decimal if I don't do this not work, I don't know whyyy
             const start = this.wave.regions.list[Object.keys(this.wave.regions.list)[0]].start.toFixed(2);
@@ -122,9 +168,33 @@ export default {
                 //  maxCanvasWidth: 100
             });
 
+            // this.micWave = WaveSurfer.create({
+            //     container: '#micWave',
+            //     waveColor: 'green',
+            //     interact: false,
+            //     cursorWidth: 0,
+            //     plugins: [
+            //         WaveSurfer.microphone.create()
+            //     ]
+            // });
+            // this.micWave.microphone.on('deviceReady', function(stream) {
+            //     console.log('Device ready!', stream);
+            // });
+            // this.micWave.microphone.on('deviceError', function(code) {
+            //     console.warn('Device error: ' + code);
+            // });
+            // this.micWave.microphone.start();
+
             this.wave.regions.clear();
             this.wave.load("https://ia902606.us.archive.org/35/items/shortpoetry_047_librivox/song_cjrg_teasdale_64kb.mp3");
             window.ws = this.wave
+        },
+        toggleRecord(){
+            if (this.micWave.microphone.active) {
+                this.micWave.microphone.stop();
+            } else {
+                this.micWave.microphone.start();
+            }
         },
         toggleRecording() {
             let self = this;
@@ -134,6 +204,7 @@ export default {
             if (this.recorder && this.isRecording) {
                 this.recorder.stop();
                 this.gumStream.getAudioTracks()[0].stop();
+                // this.micWave.microphone.stop();
             } else {
                 navigator.mediaDevices.getUserMedia({
                     audio: true
@@ -156,6 +227,7 @@ export default {
                         fileReader.readAsArrayBuffer(e.data);
                     };
                     this.recorder.start();
+                    // this.micWave.microphone.start();
                 });
             }
         }
