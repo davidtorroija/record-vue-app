@@ -1,58 +1,107 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
-  </div>
+    <video id="myVideo" class="video-js vjs-default-skin"></video>
 </template>
 
-<script>
-export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
-  }
-}
-</script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+<style>
+/* change player background color */
+#myVideo {
+  background-color: #95DDF5;
 }
 </style>
+
+<script>
+    // import 'video.js/dist/video-js.css'
+    // import 'videojs-record/dist/css/videojs.record.css'
+    //
+    // import videojs from 'video.js'
+    // import Record from 'videojs-record/dist/videojs.record.js'
+    //
+    // import 'webrtc-adapter';
+    // import RecordRTC from 'recordrtc';
+    // // import './record-audio/adapter-latest.js';
+    // // import RecordRTC from './record-audio/RecordRTC.js';
+    // // the following imports are only needed when you're recording
+    // // audio-only using the videojs-wavesurfer plugin
+    // import WaveSurfer from 'wavesurfer.js';
+    // import MicrophonePlugin from './record-audio/wavesurfer.microphone.min.js';
+    // import RegionsPlugin from './record-audio/wavesurfer.regions.min.js';
+    // WaveSurfer.microphone = MicrophonePlugin;
+    // WaveSurfer.regions = RegionsPlugin;
+    // window.wavesurfer = WaveSurfer
+    //
+    // // register videojs-wavesurfer plugin
+    // import Wavesurfer from './record-audio/videojs.wavesurfer.min.js';
+
+    export default {
+        data() {
+            return {
+                player: '',
+                options: {
+                    controls: true,
+                    autoplay: false,
+                    fluid: false,
+                    loop: false,
+                    width: 320,
+                    height: 240,
+                    controlBar: {
+                        volumePanel: false
+                    },
+                    plugins: {
+                        // configure videojs-record plugin
+                        wavesurfer: {
+                           src: 'live',
+                           waveColor: '#36393b',
+                           progressColor: 'black',
+                           debug: true,
+                           cursorWidth: 1,
+                           msDisplayMax: 20,
+                           hideScrollbar: true
+                       },
+                        record: {
+                            audio: false,
+                            video: true,
+                            debug: true
+                        }
+                    }
+                }
+            };
+        },
+        mounted() {
+            // this.player = videojs('#myVideo', this.options, () => {
+            //     // print version information at startup
+            //     var msg = 'Using video.js ' + videojs.VERSION +
+            //         ' with videojs-record ' + videojs.getPluginVersion('record') +
+            //         ' and recordrtc ' + RecordRTC.version;
+            //     videojs.log(msg);
+            // });
+            //
+            // // device is ready
+            // this.player.on('deviceReady', () => {
+            //     console.log('device is ready!');
+            // });
+            //
+            // // user clicked the record button and started recording
+            // this.player.on('startRecord', () => {
+            //     console.log('started recording!');
+            // });
+            //
+            // // user completed recording and stream is available
+            // this.player.on('finishRecord', () => {
+            //     // the blob object contains the recorded data that
+            //     // can be downloaded by the user, stored on server etc.
+            //     console.log('finished recording: ', this.player.recordedData);
+            // });
+            //
+            // // error handling
+            // this.player.on('error', (error) => {
+            //     console.warn(error);
+            // });
+            
+        },
+        beforeDestroy() {
+            if (this.player) {
+                this.player.dispose();
+            }
+        }
+    }
+</script>
