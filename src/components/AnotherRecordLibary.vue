@@ -189,7 +189,7 @@ export default {
             this.wave.load("https://ia902606.us.archive.org/35/items/shortpoetry_047_librivox/song_cjrg_teasdale_64kb.mp3");
             window.ws = this.wave
         },
-        toggleRecord(){
+        toggleRecord() {
             if (this.micWave.microphone.active) {
                 this.micWave.microphone.stop();
             } else {
@@ -197,7 +197,7 @@ export default {
             }
         },
         toggleRecording() {
-            let self = this;
+            // let this = this;
             if (this.recorder) {
                 console.log("state", this.recorder.state, this.recorder);
             }
@@ -214,16 +214,25 @@ export default {
                     this.recorder = new MediaRecorder(stream);
                     // }
                     console.log(stream, this.recorder)
-                    this.recorder.ondataavailable = function(e) {
+                    this.recorder.ondataavailable = (e) => {
                         // var url = URL.createObjectURL(e.data);
                         // console.log(e.data, url, e)
                         // var preview = document.createElement("audio");
                         // preview.controls = true;preview.src = url;
                         // document.body.appendChild(preview);
                         let fileReader = new FileReader();
-                        fileReader.addEventListener("load", e =>
-                            self.wave.loadArrayBuffer(e.target.result)
-                        );
+                        fileReader.addEventListener("load", e => {
+                            this.wave.loadArrayBuffer(e.target.result);
+                            setTimeout(()=>this.wave.regions.add({
+                                start: 0,
+                                end: this.wave.getDuration(),
+                                color: 'hsla(200, 50%, 70%, 0.2)'
+                            }),500)
+                        });
+                        console.log("result", this.wave)
+                        this.wave.drawer.clearWave();
+                        this.wave.regions.clear();
+                        this.wave.empty();
                         fileReader.readAsArrayBuffer(e.data);
                     };
                     this.recorder.start();
