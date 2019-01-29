@@ -13,21 +13,89 @@
         <button @click="playSelectedRegion">Play Region</button>
         <button @click="trimRegion">Trim</button>
         <button @click="deleteRegion">Delete</button>
-
     </div>
-    <div id="formats">Format: start recording to see sample rate</div>
-    <h3>Recordings</h3>
-    <ol id="recordingsList"></ol>
-
+    <div class="spectrum">
+        <svg preserveAspectRatio="none" id="visualizer" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+         <defs>
+             <mask id="mask">
+                 <g id="maskGroup">
+               </g>
+             </mask>
+             <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#FFFFF;stop-opacity:1" />
+                <stop offset="20%" style="stop-color:#0096C6;stop-opacity:1" />
+                <stop offset="90%" style="stop-color:#02A8DD;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#0073e3;stop-opacity:1" />
+             </linearGradient>
+         </defs>
+         <rect x="0" y="0" width="100%" height="100%" fill="url(#gradient)" mask="url(#mask)"></rect>
+        </svg>
+    </div>
 </div>
 </template>
 <script>
 import WaveSurfer from "wavesurfer.js";
 import MicrophonePlugin from "wavesurfer.js/dist/plugin/wavesurfer.microphone.min.js";
 import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions.min.js";
-// import( /* webpackIgnore: true */ 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css').then((lib)=>{
+// import( /* webpackIgnore: true */ "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css").then((lib)=>{
 //    console.log(lib)
 // });
+
+window.onload = function() {
+    var paths = document.getElementsByTagName('path');
+    var visualizer = document.getElementById('visualizer');
+    var mask = visualizer.getElementById('mask');
+    var path;
+    var report = 0;
+
+    var soundAllowed = function(stream) {
+        //Audio stops listening in FF without // window.persistAudioStream = stream;
+        //https://bugzilla.mozilla.org/show_bug.cgi?id=965483
+        //https://support.mozilla.org/en-US/questions/984179
+        window.persistAudioStream = stream;
+        var audioContent = new AudioContext();
+        var audioStream = audioContent.createMediaStreamSource(stream);
+        var analyser = audioContent.createAnalyser();
+        audioStream.connect(analyser);
+        analyser.fftSize = 1024;
+
+        var frequencyArray = new Uint8Array(analyser.frequencyBinCount);
+        visualizer.setAttribute('viewBox', '0 0 255 255');
+
+        //Through the frequencyArray has a length longer than 255, there seems to be no
+        //significant data after this point. Not worth visualizing.
+        for (var i = 0; i < 255; i++) {
+            path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            // path.setAttribute('stroke-dasharray', '4,1');
+            mask.appendChild(path);
+        }
+        var doDraw = function() {
+            requestAnimationFrame(doDraw);
+            analyser.getByteFrequencyData(frequencyArray);
+            var adjustedLength;
+            for (var i = 0; i < 255; i = i + 3) {
+                adjustedLength = Math.floor(frequencyArray[i]) - (Math.floor(frequencyArray[i]) % 5);
+                paths[i].setAttribute('d', 'M ' + (i) + ',255 l 0,-' + adjustedLength);
+            }
+
+        }
+        doDraw();
+    }
+
+    var soundNotAllowed = function(error) {
+        console.log(error);
+    }
+
+    /*window.navigator = window.navigator || {};
+    /*navigator.getUserMedia =  navigator.getUserMedia       ||
+                              navigator.webkitGetUserMedia ||
+                              navigator.mozGetUserMedia    ||
+                              null;*/
+    navigator.getUserMedia({
+        audio: true
+    }, soundAllowed, soundNotAllowed);
+
+};
 
 WaveSurfer.microphone = MicrophonePlugin;
 WaveSurfer.regions = RegionsPlugin;
@@ -60,7 +128,7 @@ export default {
     },
     methods: {
         deleteRegion() {
-            // I had to fixed to two decimal if I don't do this not work, I don't know whyyy
+            // I had to fixed to two decimal if I don"t do this not work, I don"t know whyyy
             const start = this.wave.regions.list[Object.keys(this.wave.regions.list)[0]].start.toFixed(2);
             const end = this.wave.regions.list[Object.keys(this.wave.regions.list)[0]].end.toFixed(2);
             const originalBuffer = this.wave.backend.buffer;
@@ -98,11 +166,11 @@ export default {
             this.wave.regions.add({
                 start: 0,
                 end: end,
-                color: 'hsla(200, 50%, 70%, 0.2)'
+                color: "hsla(200, 50%, 70%, 0.2)"
             });
         },
         trimRegion() {
-            // I had to fixed to two decimal if I don't do this not work, I don't know whyyy
+            // I had to fixed to two decimal if I don"t do this not work, I don"t know whyyy
             const start = this.wave.regions.list[Object.keys(this.wave.regions.list)[0]].start.toFixed(2);
             const end = this.wave.regions.list[Object.keys(this.wave.regions.list)[0]].end.toFixed(2);
             const originalBuffer = this.wave.backend.buffer;
@@ -128,7 +196,7 @@ export default {
             this.wave.regions.add({
                 start: 0,
                 end: end,
-                color: 'hsla(200, 50%, 70%, 0.2)'
+                color: "hsla(200, 50%, 70%, 0.2)"
             });
         },
         playPause() {
@@ -169,21 +237,22 @@ export default {
             });
 
             // this.micWave = WaveSurfer.create({
-            //     container: '#micWave',
-            //     waveColor: 'green',
+            //     container: "#micWave",
+            //     waveColor: "green",
             //     interact: false,
             //     cursorWidth: 0,
             //     plugins: [
             //         WaveSurfer.microphone.create()
             //     ]
             // });
-            // this.micWave.microphone.on('deviceReady', function(stream) {
-            //     console.log('Device ready!', stream);
+            // this.micWave.microphone.on("deviceReady", function(stream) {
+            //     console.log("Device ready!", stream);
             // });
-            // this.micWave.microphone.on('deviceError', function(code) {
-            //     console.warn('Device error: ' + code);
+            // this.micWave.microphone.on("deviceError", function(code) {
+            //     console.warn("Device error: " + code);
             // });
             // this.micWave.microphone.start();
+
 
             this.wave.regions.clear();
             this.wave.load("https://ia902606.us.archive.org/35/items/shortpoetry_047_librivox/song_cjrg_teasdale_64kb.mp3");
@@ -223,16 +292,16 @@ export default {
                         let fileReader = new FileReader();
                         fileReader.addEventListener("load", e => {
                             this.wave.loadArrayBuffer(e.target.result);
-                            setTimeout(()=>this.wave.regions.add({
+                            setTimeout(() => this.wave.regions.add({
                                 start: 0,
                                 end: this.wave.getDuration(),
-                                color: 'hsla(200, 50%, 70%, 0.2)'
-                            }),500)
+                                color: "hsla(200, 50%, 70%, 0.2)"
+                            }), 500)
                         });
-                        console.log("result", this.wave)
-                        this.wave.drawer.clearWave();
+                        // console.log("result", this.wave)
+                        // this.wave.drawer.clearWave();
                         this.wave.regions.clear();
-                        this.wave.empty();
+                        // this.wave.empty();
                         fileReader.readAsArrayBuffer(e.data);
                     };
                     this.recorder.start();
@@ -244,11 +313,6 @@ export default {
 }
 </script>
 <style>
-* {
-    padding: 0;
-    margin: 0;
-}
-
 a {
     color: #337ab7;
 }
@@ -336,5 +400,31 @@ li {
 #formats {
     margin-top: 0.5rem;
     font-size: 80%;
+}
+/* spectrum */
+.spectrum {
+    width: 300px;
+    height: 100px;
+}
+.spectrum{
+    padding: 0;
+    margin: 0;
+    background-color:#222;
+    font-size: 0;
+}
+
+svg{
+    display: block;
+    width: 300px;
+    height: 100px;
+    padding: 0;
+    margin: 0;
+    position:absolute;
+}
+
+path{
+    stroke-linecap: square;
+    stroke: white;
+    stroke-width: 2px;
 }
 </style>
