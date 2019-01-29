@@ -1,9 +1,8 @@
 <template>
 <div>
-    <div id="micWave"></div>
-    <div id="waveform"></div>
+    <Visualizer v-show="isRecording" />
+    <div v-show="!isRecording" id="waveform"></div>
     <div id="controls">
-        <!-- <button v-show="!isRecording" @click="toggleRecord">Record1</button> -->
         <button v-show="!isRecording" @click="toggleRecording">Record</button>
         <button v-show="isRecording" @click="toggleRecording">Stop Record</button>
         <p> | </p>
@@ -14,101 +13,31 @@
         <button @click="trimRegion">Trim</button>
         <button @click="deleteRegion">Delete</button>
     </div>
-    <div class="spectrum">
-        <svg preserveAspectRatio="none" id="visualizer" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-         <defs>
-             <mask id="mask">
-                 <g id="maskGroup">
-               </g>
-             </mask>
-             <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#FFFFF;stop-opacity:1" />
-                <stop offset="20%" style="stop-color:#0096C6;stop-opacity:1" />
-                <stop offset="90%" style="stop-color:#02A8DD;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#0073e3;stop-opacity:1" />
-             </linearGradient>
-         </defs>
-         <rect x="0" y="0" width="100%" height="100%" fill="url(#gradient)" mask="url(#mask)"></rect>
-        </svg>
-    </div>
 </div>
 </template>
 <script>
 import WaveSurfer from "wavesurfer.js";
 import MicrophonePlugin from "wavesurfer.js/dist/plugin/wavesurfer.microphone.min.js";
 import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions.min.js";
-// import( /* webpackIgnore: true */ "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css").then((lib)=>{
-//    console.log(lib)
-// });
-
-window.onload = function() {
-    var paths = document.getElementsByTagName('path');
-    var visualizer = document.getElementById('visualizer');
-    var mask = visualizer.getElementById('mask');
-    var path;
-    var report = 0;
-
-    var soundAllowed = function(stream) {
-        //Audio stops listening in FF without // window.persistAudioStream = stream;
-        //https://bugzilla.mozilla.org/show_bug.cgi?id=965483
-        //https://support.mozilla.org/en-US/questions/984179
-        window.persistAudioStream = stream;
-        var audioContent = new AudioContext();
-        var audioStream = audioContent.createMediaStreamSource(stream);
-        var analyser = audioContent.createAnalyser();
-        audioStream.connect(analyser);
-        analyser.fftSize = 1024;
-
-        var frequencyArray = new Uint8Array(analyser.frequencyBinCount);
-        visualizer.setAttribute('viewBox', '0 0 255 255');
-
-        //Through the frequencyArray has a length longer than 255, there seems to be no
-        //significant data after this point. Not worth visualizing.
-        for (var i = 0; i < 255; i++) {
-            path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            // path.setAttribute('stroke-dasharray', '4,1');
-            mask.appendChild(path);
-        }
-        var doDraw = function() {
-            requestAnimationFrame(doDraw);
-            analyser.getByteFrequencyData(frequencyArray);
-            var adjustedLength;
-            for (var i = 0; i < 255; i = i + 3) {
-                adjustedLength = Math.floor(frequencyArray[i]) - (Math.floor(frequencyArray[i]) % 5);
-                paths[i].setAttribute('d', 'M ' + (i) + ',255 l 0,-' + adjustedLength);
-            }
-
-        }
-        doDraw();
-    }
-
-    var soundNotAllowed = function(error) {
-        console.log(error);
-    }
-
-    /*window.navigator = window.navigator || {};
-    /*navigator.getUserMedia =  navigator.getUserMedia       ||
-                              navigator.webkitGetUserMedia ||
-                              navigator.mozGetUserMedia    ||
-                              null;*/
-    navigator.getUserMedia({
-        audio: true
-    }, soundAllowed, soundNotAllowed);
-
-};
 
 WaveSurfer.microphone = MicrophonePlugin;
 WaveSurfer.regions = RegionsPlugin;
 
+import Visualizer from "./Visualizer";
+
 export default {
     name: "",
+    components: {
+        Visualizer
+    },
     data() {
         return {
             recorder: null,
             gumStream: null,
             wave: null,
             waveRegions: null,
-            micWave: null
+            micWave: null,
+            isRecording: false,
         };
     },
     mounted() {
@@ -116,9 +45,12 @@ export default {
 
     },
     computed: {
-        isRecording() {
-            return this.recorder && this.recorder.state === "recording";
-        },
+        // isRecording() {
+        //     if (this.recorder){
+        //         console.log(this.recorder, this.recorder.state === "recording");
+        //     }
+        //     return this.recorder && this.recorder.state === "recording";
+        // },
         isPlaying() {
             if (this.wave) {
                 return this.wave.isPlaying();
@@ -127,6 +59,9 @@ export default {
         }
     },
     methods: {
+        isRecordingMethod(){
+            return this.recorder && this.recorder.state === "recording";
+        },
         deleteRegion() {
             // I had to fixed to two decimal if I don"t do this not work, I don"t know whyyy
             const start = this.wave.regions.list[Object.keys(this.wave.regions.list)[0]].start.toFixed(2);
@@ -218,7 +153,7 @@ export default {
             })
             this.wave = WaveSurfer.create({
                 container: "#waveform",
-                waveColor: "#46a6d8",
+                waveColor: "#02A8DD",
                 progressColor: "#FFF",
                 barWidth: 3,
                 barGap: 2,
@@ -266,35 +201,28 @@ export default {
             }
         },
         toggleRecording() {
-            // let this = this;
-            if (this.recorder) {
-                console.log("state", this.recorder.state, this.recorder);
-            }
             if (this.recorder && this.isRecording) {
                 this.recorder.stop();
                 this.gumStream.getAudioTracks()[0].stop();
+                this.isRecording = false;
                 // this.micWave.microphone.stop();
             } else {
                 navigator.mediaDevices.getUserMedia({
                     audio: true
                 }).then((stream) => {
+                    this.isRecording = true;
                     this.gumStream = stream;
                     // if (!this.recorder) {
                     this.recorder = new MediaRecorder(stream);
                     // }
                     console.log(stream, this.recorder)
                     this.recorder.ondataavailable = (e) => {
-                        // var url = URL.createObjectURL(e.data);
-                        // console.log(e.data, url, e)
-                        // var preview = document.createElement("audio");
-                        // preview.controls = true;preview.src = url;
-                        // document.body.appendChild(preview);
                         let fileReader = new FileReader();
                         fileReader.addEventListener("load", e => {
                             this.wave.loadArrayBuffer(e.target.result);
                             setTimeout(() => this.wave.regions.add({
                                 start: 0,
-                                end: this.wave.getDuration(),
+                                end: this.wave.getDuration().toFixed(2) ,
                                 color: "hsla(200, 50%, 70%, 0.2)"
                             }), 500)
                         });
@@ -308,6 +236,9 @@ export default {
                     // this.micWave.microphone.start();
                 });
             }
+            // if (this.recorder) {
+            //     console.log("state", this.recorder.state, this.recorder);
+            // }
         }
     }
 }
@@ -401,30 +332,5 @@ li {
     margin-top: 0.5rem;
     font-size: 80%;
 }
-/* spectrum */
-.spectrum {
-    width: 300px;
-    height: 100px;
-}
-.spectrum{
-    padding: 0;
-    margin: 0;
-    background-color:#222;
-    font-size: 0;
-}
 
-svg{
-    display: block;
-    width: 300px;
-    height: 100px;
-    padding: 0;
-    margin: 0;
-    position:absolute;
-}
-
-path{
-    stroke-linecap: square;
-    stroke: white;
-    stroke-width: 2px;
-}
 </style>
