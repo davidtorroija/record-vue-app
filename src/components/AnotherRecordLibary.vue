@@ -1,6 +1,6 @@
 <template>
 <div>
-    <Visualizer v-show="isRecording" />
+    <Visualizer v-if="isRecording" />
     <div v-show="!isRecording" id="waveform"></div>
     <div id="controls">
         <button v-show="!isRecording" @click="toggleRecording">Record</button>
@@ -68,17 +68,17 @@ export default {
             const end = this.wave.regions.list[Object.keys(this.wave.regions.list)[0]].end.toFixed(2);
             const originalBuffer = this.wave.backend.buffer;
             console.log(end, start, end, start, originalBuffer, (end - start) * (originalBuffer.sampleRate * 1))
-            var emptySegment = this.wave.backend.ac.createBuffer(
+            let emptySegment = this.wave.backend.ac.createBuffer(
                 originalBuffer.numberOfChannels,
                 (this.wave.getDuration() - (end - start)) * (originalBuffer.sampleRate * 1),
                 originalBuffer.sampleRate
             );
             console.log("total nueva wave", this.wave.getDuration(), end, start)
-            for (var i = 0; i < originalBuffer.numberOfChannels; i++) {
-                var chanData = originalBuffer.getChannelData(i);
-                var segmentChanData = emptySegment.getChannelData(i);
+            for (let i = 0; i < originalBuffer.numberOfChannels; i++) {
+                let chanData = originalBuffer.getChannelData(i);
+                let segmentChanData = emptySegment.getChannelData(i);
                 const offset = end * originalBuffer.sampleRate;
-                for (var j = 0, len = chanData.length; j < originalBuffer.length; j++) {
+                for (let j = 0, len = chanData.length; j < originalBuffer.length; j++) {
                     if (j < (start * originalBuffer.sampleRate)) {
                         //TODO: contemplate other cases when the region is at the end
                         segmentChanData[j] = chanData[j]
@@ -110,17 +110,17 @@ export default {
             const end = this.wave.regions.list[Object.keys(this.wave.regions.list)[0]].end.toFixed(2);
             const originalBuffer = this.wave.backend.buffer;
             console.log(end, start, end, start, originalBuffer, (end - start) * (originalBuffer.sampleRate * 1))
-            var emptySegment = this.wave.backend.ac.createBuffer(
+            let emptySegment = this.wave.backend.ac.createBuffer(
                 originalBuffer.numberOfChannels,
                 //segment duration
                 (end - start) * (originalBuffer.sampleRate * 1),
                 originalBuffer.sampleRate
             );
 
-            for (var i = 0; i < originalBuffer.numberOfChannels; i++) {
-                var chanData = originalBuffer.getChannelData(i);
-                var segmentChanData = emptySegment.getChannelData(i);
-                for (var j = 0, len = chanData.length; j < end * originalBuffer.sampleRate; j++) {
+            for (let i = 0; i < originalBuffer.numberOfChannels; i++) {
+                let chanData = originalBuffer.getChannelData(i);
+                let segmentChanData = emptySegment.getChannelData(i);
+                for (let j = 0, len = chanData.length; j < end * originalBuffer.sampleRate; j++) {
                     segmentChanData[j] = chanData[j + (start * originalBuffer.sampleRate)];
                 }
             }
