@@ -331,4 +331,19 @@ li {
     font-size: 80%;
 }
 
+/* waveform */
+.wavesurfer-handle{
+  cursor: col-resize;
+  position: absolute;
+  left: 100%;
+  top: 0px;
+  width: 20px !important;
+  max-width: 20px !important;
+  height: 100%;
+  background: #CCC;
+}
+.wavesurfer-handle-end{
+
+}
+
 </style>
