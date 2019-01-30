@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const { resolve } = require("path");
-
 const rootResolve = (path) => (resolve(__dirname, "..", path));
+
 module.exports = {
   configureWebpack: {
     plugins: [
@@ -13,7 +13,8 @@ module.exports = {
      // (wavesurfer.js has some non-standard naming convention)
      resolve: {
        alias: {
-         wavesurfer: require.resolve('wavesurfer.js')
+         wavesurfer: require.resolve('wavesurfer.js'),
+         lib: rootResolve("lib"),
        }
      },
   }

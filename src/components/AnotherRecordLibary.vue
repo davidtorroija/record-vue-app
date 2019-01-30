@@ -18,10 +18,13 @@
 <script>
 import WaveSurfer from "wavesurfer.js";
 import MicrophonePlugin from "wavesurfer.js/dist/plugin/wavesurfer.microphone.min.js";
-import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions.min.js";
+import CursorPlugin from "wavesurfer.js/dist/plugin/wavesurfer.cursor.min.js";
+// import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions.js";
+import RegionsPlugin from "../../lib/wavesurfer.js/src/plugin/regions.js";
 
 WaveSurfer.microphone = MicrophonePlugin;
 WaveSurfer.regions = RegionsPlugin;
+WaveSurfer.cursor = CursorPlugin;
 
 import Visualizer from "./Visualizer";
 
@@ -167,27 +170,22 @@ export default {
                 //minimap: true,
                 plugins: [
                     this.waveRegions,
+                    WaveSurfer.cursor.create({
+                        showTime: true,
+                        opacity: 1,
+                        color: "white",
+                        width: "1px",
+                        customShowTimeStyle: {
+                            "background-color": "#02A8DD",
+                            color: "#fff",
+                            padding: "2px",
+                            "font-size": "14px",
+                            height: "20px"
+                        }
+                    })
                 ],
                 //  maxCanvasWidth: 100
             });
-
-            // this.micWave = WaveSurfer.create({
-            //     container: "#micWave",
-            //     waveColor: "green",
-            //     interact: false,
-            //     cursorWidth: 0,
-            //     plugins: [
-            //         WaveSurfer.microphone.create()
-            //     ]
-            // });
-            // this.micWave.microphone.on("deviceReady", function(stream) {
-            //     console.log("Device ready!", stream);
-            // });
-            // this.micWave.microphone.on("deviceError", function(code) {
-            //     console.warn("Device error: " + code);
-            // });
-            // this.micWave.microphone.start();
-
 
             this.wave.regions.clear();
             this.wave.load("https://ia902606.us.archive.org/35/items/shortpoetry_047_librivox/song_cjrg_teasdale_64kb.mp3");
@@ -220,11 +218,11 @@ export default {
                         let fileReader = new FileReader();
                         fileReader.addEventListener("load", e => {
                             this.wave.loadArrayBuffer(e.target.result);
-                            setTimeout(() => this.wave.regions.add({
-                                start: 0,
-                                end: this.wave.getDuration().toFixed(2) ,
-                                color: "hsla(200, 50%, 70%, 0.2)"
-                            }), 500)
+                            // setTimeout(() => this.wave.regions.add({
+                            //     start: 0,
+                            //     end: this.wave.getDuration().toFixed(2) ,
+                            //     color: "hsla(200, 50%, 70%, 0.2)"
+                            // }), 500)
                         });
                         // console.log("result", this.wave)
                         // this.wave.drawer.clearWave();
