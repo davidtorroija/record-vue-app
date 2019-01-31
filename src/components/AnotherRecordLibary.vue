@@ -1,7 +1,9 @@
 <template>
 <div>
     <Visualizer v-if="isRecording" />
-    <div v-show="!isRecording" id="waveform"></div>
+    <div class="waveform-container">
+        <div v-show="!isRecording" id="waveform"></div>
+    </div>
     <div id="controls">
         <button v-show="!isRecording" @click="toggleRecording">Record</button>
         <button v-show="isRecording" @click="toggleRecording">Stop Record</button>
@@ -146,8 +148,8 @@ export default {
         initWaveSurfer() {
             this.waveRegions = WaveSurfer.regions.create({
                 regions: [{
-                    start: 10.817485764676242,
-                    end: 20.817485764676242,
+                    start: 2,
+                    end: 4,
                     color: "hsla(200, 50%, 70%, 0.2)",
                 }],
                 dragSelection: {
@@ -156,15 +158,16 @@ export default {
             })
             this.wave = WaveSurfer.create({
                 container: "#waveform",
-                waveColor: "#02A8DD",
-                progressColor: "#FFF",
+                waveColor: "#FFF",
+                progressColor: "#46a6d8",
                 barWidth: 3,
                 barGap: 2,
-                height: 130,
+                // height: 130,
                 cursorWidth: 1,
-                cursorColor: "white",
+                cursorColor: "#46a6d8",
                 //pixelRatio: 1,
-                //scrollParent: true,
+                scrollParent: false,
+                hideScrollbar: true,
                 responsive: 1000,
                 normalize: true,
                 //minimap: true,
@@ -176,11 +179,11 @@ export default {
                         color: "white",
                         width: "1px",
                         customShowTimeStyle: {
-                            "background-color": "#02A8DD",
+                            "background-color": "#46a6d8",
                             color: "#fff",
                             padding: "2px",
                             "font-size": "14px",
-                            height: "20px"
+                            height: "19px"
                         }
                     })
                 ],
@@ -188,7 +191,9 @@ export default {
             });
 
             this.wave.regions.clear();
+            http://www.noiseaddicts.com/samples_1w72b820/29.mp3
             this.wave.load("https://ia902606.us.archive.org/35/items/shortpoetry_047_librivox/song_cjrg_teasdale_64kb.mp3");
+            // this.wave.load("https://sample-videos.com/audio/mp3/crowd-cheering.mp3");
             window.ws = this.wave
         },
         toggleRecord() {
@@ -337,13 +342,33 @@ li {
   position: absolute;
   left: 100%;
   top: 0px;
-  width: 20px !important;
-  max-width: 20px !important;
+  width: 15px !important;
+  max-width: 15px !important;
   height: 100%;
-  background: #CCC;
+  background: #46a6d8;
+  opacity: 1;
 }
-.wavesurfer-handle-end{
+#waveform {
+    position: relative;
+}
+.waveform-container {
+    background: #424242 !important;
+    padding: 5px !important;
+    border: 3px !important;
+    border-color: red !important;
+    border-radius: 7px !important;
+}
 
+.wavesurfer-handle-end{
+    border-bottom-right-radius: 7px !important;
+    border-top-right-radius: 7px !important;
+    margin-right: -15px;
 }
+.wavesurfer-handle-start{
+    margin-left: -15px;
+    border-bottom-left-radius: 7px !important;
+    border-top-left-radius: 7px !important;
+}
+
 
 </style>
