@@ -148,12 +148,11 @@ export default {
         initWaveSurfer() {
             this.waveRegions = WaveSurfer.regions.create({
                 regions: [{
-                    start: 2,
-                    end: 4,
+                    start: 3,
+                    end: 7,
                     color: "hsla(200, 50%, 70%, 0.2)",
                 }],
-
-                slop: 2000,
+                slop: 10,
                 dragSelection: false,
                 // dragSelection: {
                 //     slop: 2000
@@ -162,7 +161,7 @@ export default {
             this.wave = WaveSurfer.create({
                 container: "#waveform",
                 waveColor: "#FFF",
-                progressColor: "#46a6d8",
+                progressColor: "#FFF",
                 barWidth: 3,
                 barGap: 2,
                 // height: 130,
@@ -273,7 +272,7 @@ body {
     max-width: 28rem;
     margin: 0 auto;
     position: relative;
-    background: rgb(23, 24, 113);
+    background: rgb(84, 123, 135);
 }
 
 #controls {
@@ -350,6 +349,9 @@ li {
   height: 100%;
   background: #46a6d8;
   opacity: 1;
+}
+.wavesurfer-region{
+    z-index: 4 !important;
 }
 #waveform {
     position: relative;
