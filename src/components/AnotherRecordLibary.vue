@@ -152,9 +152,12 @@ export default {
                     end: 4,
                     color: "hsla(200, 50%, 70%, 0.2)",
                 }],
-                dragSelection: {
-                    slop: 5
-                }
+
+                slop: 2000,
+                dragSelection: false,
+                // dragSelection: {
+                //     slop: 2000
+                // }
             })
             this.wave = WaveSurfer.create({
                 container: "#waveform",
@@ -168,7 +171,7 @@ export default {
                 //pixelRatio: 1,
                 scrollParent: false,
                 hideScrollbar: true,
-                responsive: 1000,
+                // responsive: 1000,
                 normalize: true,
                 //minimap: true,
                 plugins: [
