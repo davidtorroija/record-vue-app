@@ -1,5 +1,8 @@
 <template>
 <div>
+    <div class="timer">
+        <h2 id="current-time">{{currentTime}}</h2>
+    </div>
     <Visualizer v-if="isRecording" />
     <div class="waveform-container">
         <div v-show="!isRecording" id="waveform"></div>
@@ -43,6 +46,7 @@ export default {
             waveRegions: null,
             micWave: null,
             isRecording: false,
+            currentTime: "00:00:00",
         };
     },
     mounted() {
@@ -163,11 +167,11 @@ export default {
                 waveColor: "#FFF",
                 progressColor: "#FFF",
                 barWidth: 3,
-                barGap: 2,
+                barGap: 3,
                 // height: 130,
                 cursorWidth: 1,
                 cursorColor: "#46a6d8",
-                //pixelRatio: 1,
+                // pixelRatio: 115,
                 scrollParent: false,
                 hideScrollbar: true,
                 // responsive: 1000,
@@ -177,7 +181,7 @@ export default {
                     this.waveRegions,
                     WaveSurfer.cursor.create({
                         showTime: true,
-                        opacity: 1,
+                        opacity: 0.9,
                         color: "white",
                         width: "1px",
                         customShowTimeStyle: {
@@ -192,11 +196,24 @@ export default {
                 //  maxCanvasWidth: 100
             });
 
+            this.wave.backend.on('audioprocess', (time) => {
+                this.setCurrentTimeInMMSSMMMM(time);
+            })
+            this.wave.on('seek', () => {
+                this.setCurrentTimeInMMSSMMMM(this.wave.getCurrentTime());
+            })
+
             this.wave.regions.clear();
-            http://www.noiseaddicts.com/samples_1w72b820/29.mp3
+            // http://www.noiseaddicts.com/samples_1w72b820/29.mp3
             this.wave.load("https://ia902606.us.archive.org/35/items/shortpoetry_047_librivox/song_cjrg_teasdale_64kb.mp3");
             // this.wave.load("https://sample-videos.com/audio/mp3/crowd-cheering.mp3");
             window.ws = this.wave
+        },
+        setCurrentTimeInMMSSMMMM(time) {
+            var minutes = Math.floor((time % 3600) / 60);
+            var seconds = ('00' + Math.floor(time % 60)).slice(-2);
+            var milliseconds = ('00' + Math.floor((time - (seconds * 1)) * 100)).slice(-2);
+            this.currentTime = `${minutes} : ${seconds} : ${milliseconds}`;
         },
         toggleRecord() {
             if (this.micWave.microphone.active) {
@@ -362,6 +379,9 @@ li {
     border: 3px !important;
     border-color: red !important;
     border-radius: 7px !important;
+}
+showtitle, cursor{
+    z-index: 5 !important;
 }
 
 .wavesurfer-handle-end{
