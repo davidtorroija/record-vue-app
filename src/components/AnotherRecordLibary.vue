@@ -3,8 +3,8 @@
     <div class="timer">
         <h2 id="current-time">{{currentTime}}</h2>
     </div>
-    <Visualizer v-if="isRecording" />
     <div class="waveform-container">
+        <Visualizer v-if="isRecording" />
         <div v-show="!isRecording" id="waveform"></div>
     </div>
     <div id="controls">

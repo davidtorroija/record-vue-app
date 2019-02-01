@@ -61,11 +61,12 @@ export default {
                 analyser.fftSize = 1024;
 
                 let frequencyArray = new Uint8Array(analyser.frequencyBinCount);
+                // console.log("frequ", frequencyArray)
                 visualizer.setAttribute('viewBox', '0 0 255 255');
 
                 //Through the frequencyArray has a length longer than 255, there seems to be no
                 //significant data after this point. Not worth visualizing.
-                for (let i = 0; i < 255; i++) {
+                for (let i = 0; i < 90; i++) {
                     path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                     // path.setAttribute('stroke-dasharray', '4,1');
                     mask.appendChild(path);
@@ -74,9 +75,9 @@ export default {
                     this.animationId = requestAnimationFrame(doDraw);
                     analyser.getByteFrequencyData(frequencyArray);
                     let adjustedLength;
-                    for (let i = 0; i < 255; i = i + 3) {
+                    for (let i = 1; i < 90; i++) {
                         adjustedLength = Math.floor(frequencyArray[i]) - (Math.floor(frequencyArray[i]) % 5);
-                        paths[i].setAttribute('d', 'M ' + (i) + ',255 l 0,-' + adjustedLength);
+                        paths[i].setAttribute('d', 'M ' + (i * 3.5) + ',255 l 0,-' + adjustedLength);
                     }
                 }
                 doDraw();
@@ -101,19 +102,17 @@ export default {
 <style >
 /* spectrum */
 .spectrum {
-    width: 300px;
+    width: 398px;
     height: 100px;
 }
 .spectrum{
-    padding: 0;
-    margin: 0;
-    background-color:#222;
     font-size: 0;
+    display: inline-block;
 }
 
 svg{
     display: block;
-    width: 300px;
+    width: 398px;
     height: 100px;
     padding: 0;
     margin: 0;
