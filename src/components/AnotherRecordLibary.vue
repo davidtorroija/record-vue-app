@@ -22,16 +22,28 @@
 </template>
 <script>
 import WaveSurfer from "wavesurfer.js";
-import MicrophonePlugin from "wavesurfer.js/dist/plugin/wavesurfer.microphone.min.js";
 import CursorPlugin from "wavesurfer.js/dist/plugin/wavesurfer.cursor.min.js";
-// import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions.js";
-import RegionsPlugin from "../../lib/wavesurfer.js/src/plugin/regions.js";
-
-WaveSurfer.microphone = MicrophonePlugin;
+import RegionsPlugin from "wavesurfer.js/dist/plugin/wavesurfer.regions.js";
+import toWav from "audiobuffer-to-wav";
+const isSafari = /^((?!chrome|android).)*safari/i.test(
+    navigator.userAgent
+);
 WaveSurfer.regions = RegionsPlugin;
 WaveSurfer.cursor = CursorPlugin;
+import moment from "moment";
+
+
+    // //hack to visualize the mic wave in Safari
+    // window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    //hack to record in Firefox
+navigator.getUserMedia = navigator.getUserMedia ||
+    navigator.webkitGetUserMedia ||
+    navigator.mozGetUserMedia ||
+    null;
 
 import Visualizer from "./Visualizer";
+import recordEdit from "./mixins/recordEdit";
+import recordActions from "./mixins/recordActions";
 
 export default {
     name: "",
