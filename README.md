@@ -2,6 +2,8 @@
 
 a POC to manage audio recorded by microphone
 
+I also developed an interesting animation when you are recording audio look this link it was awesome to develop that https://codepen.io/davidtorroija/pen/ZZzLpb
+
 ## Project setup
 ```
 npm install
