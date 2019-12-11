@@ -1,5 +1,7 @@
 # record-app
 
+a POC to manage audio recorded by microphone
+
 ## Project setup
 ```
 npm install
